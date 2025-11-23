@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanup Gruppe Darmstadt</title>
+    <link rel="icon" type="image/png" href="images/cleanup_darmstadt.png">
+    
+    <!-- Tailwind CSS (lokal) -->
+    <script src="tailwind.js"></script>
+    
+    <!-- Leaflet CSS (lokal) -->
+    <link rel="stylesheet" href="leaflet.css" />
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Next Event Section -->
+        <section id="next-event" class="bg-gray-800 text-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">🗓️ Nächster Termin</h2>
+            <div class="max-w-3xl mx-auto">
+                <div class="text-center mb-6">
+                    <p id="event-date" class="text-2xl font-bold mb-2"></p>
+                    <p id="event-time" class="text-xl"></p>
+                </div>
+                
+                <div class="bg-white/20 rounded-lg p-6 mb-4">
+                    <p class="text-lg mb-2" id="event-location"></p>
+                </div>
+                
+                <div class="bg-white/10 rounded-lg p-4 italic">
+                    <p class="text-center">
+                        <strong>🌧️ Wichtiger Hinweis:</strong> Bei (starkem) Regen entfällt das Cleanup.
+                        Dies wird am Vormittag kurzfristig entschieden.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section id="map-section" class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <!-- Map Container -->
+            <div id="map" class="h-[800px] rounded-lg shadow-md mb-4"></div>
+            
+            <!-- Map Legend -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <h4 class="font-bold mb-3">Legende:</h4>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 bg-green-500 rounded-full"></div>
+                        <span>Durchgeführte Cleanup-Aktionen</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-6 h-6 bg-yellow-500 rounded-full"></div>
+                        <span>Nächster geplanter Einsatzort</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Info Section -->
+        <section class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
+                    <h4 class="font-bold text-primary mb-3 text-xl">🎒 Was du mitbringen solltest</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Feste Schuhe</li>
+                        <li>Wetterfeste Kleidung</li>
+                        <li>Gartenhandschuhe (falls vorhanden)</li>
+                        <li>Müllzange (falls vorhanden)</li>
+                        <li>ggf. Warnweste</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
+                    <h4 class="font-bold text-primary mb-3 text-xl">✅ Was wir bereitstellen</h4>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Müllsäcke</li>
+                        <li>Handschuhe (begrenzte Anzahl)</li>
+                        <li>Organisation und Koordination</li>
+                    </ul>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
+                    <h4 class="font-bold text-primary mb-3 text-xl">👨‍👩‍👧‍👦 Für Familien geeignet</h4>
+                    <p class="text-gray-700">
+                        Unsere Cleanup-Aktionen sind familienfreundlich. Kinder sind willkommen und lernen
+                        spielerisch den verantwortungsvollen Umgang mit der Umwelt.
+                    </p>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
+                    <h4 class="font-bold text-primary mb-3 text-xl">⏱️ Zeitlicher Ablauf</h4>
+                    <p class="text-gray-700">
+                        Unsere Aktionen dauern in der Regel 1,5 Stunden. Du kannst jederzeit kommen und gehen,
+                        wie es deine Zeit erlaubt.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-primary border-b-4 border-primary pb-2 mb-6 text-center">Kontakt</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <div class="bg-gray-50 p-6 rounded-lg text-center hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold text-primary mb-4">📘 Facebook-Gruppe</h3>
+                    <p class="mb-4 text-gray-700">Termine und Austausch</p>
+                    <a href="https://www.facebook.com/groups/162624218009992" target="_blank"
+                       class="text-primary font-semibold hover:underline">
+                        Zur Facebook-Gruppe
+                    </a>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg text-center hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold text-primary mb-4">📱 WhatsApp-Gruppe</h3>
+                    <p class="mb-4 text-gray-700">Schnelle Absprachen</p>
+                    Beitritt auf Anfrage
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg text-center hover:shadow-lg transition">
+                    <h3 class="text-xl font-bold text-primary mb-4">📧 E-Mail</h3>
+                    <p class="mb-4 text-gray-700">Bei Fragen</p>
+                    birgit [at] cleanup-darmstadt.de
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Leaflet JS (lokal) -->
+    <script src="leaflet.js"></script>
+    
+    <!-- Map Script -->
+    <script>
+        // Initialize map centered on Darmstadt
+        const map = L.map('map').setView([49.8728, 8.6512], 12);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Define cleanup locations with coordinates
+        const cleanupLocations = [
+            {
+                name: 'Rodgaustraße Arheilgen',
+                lat: 49.91279854439497,
+                lng: 8.669480768027798,
+                type: 'completed',
+                description: 'am 26.10.2025'
+            },
+            {
+                name: 'Forsthaus Böllenfalltor',
+                lat: 49.852595273014146,
+                lng: 8.672246283046084,
+                type: 'completed',
+                description: 'am 16.11.2025'
+            },
+            {
+                name: 'Maulbeerallee (Arheilgen)',
+                lat: 49.898123761457086,
+                lng: 8.660985340889866,
+                type: 'planned',
+                description: 'Nächster Cleanup am 30.11.2025 um 10:30'
+            }
+        ];
+
+        // Custom icons for different marker types
+        const greenIcon = L.icon({
+            iconUrl: 'images/marker-icon-green.png',
+            shadowUrl: 'images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const yellowIcon = L.icon({
+            iconUrl: 'images/marker-icon-yellow.png',
+            shadowUrl: 'images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Add markers to map
+        cleanupLocations.forEach(location => {
+            const icon = location.type === 'planned' ? yellowIcon : greenIcon;
+            const marker = L.marker([location.lat, location.lng], { icon: icon }).addTo(map);
+            
+            const popupContent = `
+                <div style="font-family: sans-serif;">
+                    <h3 style="font-weight: bold; color: #28a745; margin-bottom: 5px;">${location.name}</h3>
+                    <p style="margin: 0; font-size: 14px;">${location.description}</p>
+                    ${location.type === 'planned' ? '<p style="margin-top: 5px; font-weight: bold; color: #ffc107;">📍 Nächster Termin!</p>' : ''}
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+        });
+
+        // Update next event section from planned location
+        const nextEvent = cleanupLocations.find(loc => loc.type === 'planned');
+        if (nextEvent) {
+            // Parse date from description (format: "Nächster Cleanup am 30.11.2025 um 10:30")
+            const dateMatch = nextEvent.description.match(/(\d{2})\.(\d{2})\.(\d{4})\s+um\s+(\d{2}:\d{2})/);
+            if (dateMatch) {
+                const [_, day, month, year, time] = dateMatch;
+                const date = new Date(year, month - 1, day);
+                const weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+                const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                
+                const formattedDate = `${weekdays[date.getDay()]}, ${day}. ${months[date.getMonth()]} ${year}`;
+                
+                document.getElementById('event-date').textContent = formattedDate;
+                document.getElementById('event-time').textContent = `${time} Uhr bis ca. 12:00 Uhr`;
+                document.getElementById('event-location').innerHTML = `<strong>📍 Einsatzgebiet:</strong> ${nextEvent.name}`;
+            }
+        }
+    </script>
+    <!-- Footer with Datenschutz & Impressum -->
+    <footer class="bg-gray-800 text-gray-300 py-8">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Impressum -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-3">Impressum</h3>
+                    <p class="text-sm">
+                        Verantwortlich: Birgit Haase<br>
+                        Wittichstraße 2<br>
+                        64295 Darmstadt<br>
+                        E-Mail: birgit [at] cleanup-darmstadt.de
+                    </p>
+                </div>
+                
+                <!-- Datenschutz -->
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-3">Datenschutz</h3>
+                    <p class="text-sm">
+                        Diese Website verwendet keine Cookies und erfasst keine personenbezogenen Daten.
+                        Die Karte wird über OpenStreetMap bereitgestellt.
+                        Kontaktanfragen per E-Mail werden nur zur Beantwortung Ihrer Anfrage verwendet.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="text-center mt-6 pt-6 border-t border-gray-700 text-sm">
+                <p>&copy; 2025 Cleanup Gruppe Darmstadt</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
