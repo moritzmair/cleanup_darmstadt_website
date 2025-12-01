@@ -171,25 +171,142 @@
         // Define cleanup locations with coordinates
         const cleanupLocations = [
             {
-                name: 'Rodgaustraße Arheilgen',
-                lat: 49.91279854439497,
-                lng: 8.669480768027798,
+                name: '',
+                lat: 49.8953277777778,
+                lng: 8.63760555555556,
                 type: 'completed',
-                description: 'am 26.10.2025'
+                description: 'am 24.03.2024',
+                image: 'aktionen/2024-03-24.jpeg'
+            },
+            {
+                name: '',
+                lat: 49.8882555555556,
+                lng: 8.66094722222222,
+                type: 'completed',
+                description: 'am 14.07.2024',
+                image: 'aktionen/2024-07-14.jpeg'
+            },
+            {
+                name: '',
+                lat: 49.8749277777778,
+                lng: 8.67290277777778,
+                type: 'completed',
+                description: 'am 13.10.2024',
+                image: 'aktionen/2024-10-13.jpeg'
+            },
+            {
+                name: '',
+                lat: 49.8921555555556,
+                lng: 8.70035277777778,
+                type: 'completed',
+                description: 'am 19.01.2025',
+                image: 'aktionen/2025-01-19.jpeg'
+            },
+            {
+                name: '',
+                lat: 49.8440777777778,
+                lng: 8.64888333333333,
+                type: 'completed',
+                description: 'am 16.03.2025',
+                image: 'aktionen/2025-03-16.jpeg'
+            },
+            {
+                name: 'Bürgerpark Parkplatz',
+                lat: 49.888259,
+                lng: 8.660894,
+                type: 'completed',
+                description: 'am 15.06.2025',
+                image: 'aktionen/2025-06-15.jpeg'
+            },
+            {
+                name: 'Arheilgen Rodgaustraße',
+                lat: 49.91296943400184,
+                lng: 8.67082876382558,
+                type: 'completed',
+                description: 'am 31.08.2025',
+                image: 'aktionen/2025-08-31.jpeg'
+            },
+            {
+                name: 'Arheilgen Unterführung',
+                lat: 49.910175998239566,
+                lng: 8.646766197838238,
+                type: 'completed',
+                description: 'am 21.09.2025',
+                image: 'aktionen/2025-09-21.jpeg'
+            },
+            {
+                name: 'Drei Brunnen Quelle',
+                lat: 49.87144843775874,
+                lng: 8.68486769176618,
+                type: 'completed',
+                description: 'am 12.10.2025',
+                image: 'aktionen/2025-10-12.jpeg'
+            },
+            {
+                name: 'Arheilgen Rodgaustraße',
+                lat: 49.912800302111265,
+                lng: 8.669544723535923,
+                type: 'completed',
+                description: 'am 26.10.2025',
+                image: 'aktionen/2025-10-26.jpeg'
             },
             {
                 name: 'Forsthaus Böllenfalltor',
-                lat: 49.852595273014146,
-                lng: 8.672246283046084,
+                lat: 49.8527722222222,
+                lng: 8.67221388888889,
                 type: 'completed',
-                description: 'am 16.11.2025'
+                description: 'am 16.11.2025',
+                image: 'aktionen/2025-11-16.jpeg'
             },
             {
                 name: 'Maulbeerallee (Arheilgen)',
                 lat: 49.898123761457086,
                 lng: 8.660985340889866,
-                type: 'planned',
-                description: 'Nächster Cleanup am 30.11.2025 um 10:30'
+                type: 'completed',
+                description: 'am 30.11.2025',
+                image: 'aktionen/2025-11-30.jpeg'
+            },
+            {
+                name: 'Pfannmüllerweg',
+                lat: 49.89441866817949,
+                lng: 8.681245355254351,
+                type: 'completed',
+                description: 'am 18.05.2025'
+            },
+            {
+                name: 'Oberwaldhaus Parkplatz Ost',
+                lat: 49.892503605373776, 
+                lng: 8.702181537666688,
+                type: 'completed',
+                description: 'am 27.04.2025'
+            },
+            {
+                name: 'Brücke über B26',
+                lat: 49.8664482068514,
+                lng: 8.695790125258684,
+                type: 'completed',
+                description: 'am 13.04.2025'
+            },
+            {
+                name: 'Kranichstein',
+                lat: 49.898097131217035,
+                lng: 8.680875193987644,
+                type: 'completed',
+                description: 'am 30.03.2025'
+            },
+            {
+                name: 'Marienplatz',
+                lat: 49.8675656920946,
+                lng: 8.645781399419167,
+                type: 'completed',
+                description: 'am 02.03.2025'
+            },
+            {
+                name: 'Dornheimer Weg',
+                lat: 49.8765319618606,
+                lng: 8.605044506838885,
+                type: 'completed',
+                description: 'am 09.02.2025'
             }
         ];
 
@@ -214,18 +331,25 @@
 
         // Add markers to map
         cleanupLocations.forEach(location => {
+            // Skip locations without coordinates
+            if (!location.lat || !location.lng) return;
+            
             const icon = location.type === 'planned' ? yellowIcon : greenIcon;
             const marker = L.marker([location.lat, location.lng], { icon: icon }).addTo(map);
             
             const popupContent = `
-                <div style="font-family: sans-serif;">
-                    <h3 style="font-weight: bold; color: #28a745; margin-bottom: 5px;">${location.name}</h3>
+                <div style="font-family: sans-serif; max-width: 280px;">
+                    ${location.name ? `<h3 style="font-weight: bold; color: #28a745; margin-bottom: 5px;">${location.name}</h3>` : ''}
                     <p style="margin: 0; font-size: 14px;">${location.description}</p>
                     ${location.type === 'planned' ? '<p style="margin-top: 5px; font-weight: bold; color: #ffc107;">📍 Nächster Termin!</p>' : ''}
+                    ${location.image ? `<img src="${location.image}" alt="Cleanup Foto" style="width: 280px; margin-top: 10px; border-radius: 4px;">` : ''}
                 </div>
             `;
             
-            marker.bindPopup(popupContent);
+            marker.bindPopup(popupContent, {
+                minWidth: 280,
+                maxWidth: 300
+            });
         });
 
         // Update next event section from planned location
