@@ -171,6 +171,13 @@
         // Define cleanup locations with coordinates
         const cleanupLocations = [
             {
+                name: 'Bürgerpark Parkplatz',
+                lat: 49.888260847276264,
+                lng: 8.660895854647498,
+                type: 'planned',
+                description: 'am 14.12.2025 um 10:30'
+            },
+            {
                 name: '',
                 lat: 49.8953277777778,
                 lng: 8.63760555555556,
@@ -368,7 +375,8 @@
                 
                 document.getElementById('event-date').textContent = formattedDate;
                 document.getElementById('event-time').textContent = `${time} Uhr bis ca. 12:00 Uhr`;
-                document.getElementById('event-location').innerHTML = `<strong>📍 Einsatzgebiet:</strong> ${nextEvent.name}`;
+                const osmLink = `https://www.openstreetmap.org/?mlat=${nextEvent.lat}&mlon=${nextEvent.lng}&zoom=17`;
+                document.getElementById('event-location').innerHTML = `<strong>📍 Einsatzgebiet:</strong> ${nextEvent.name} <a href="${osmLink}" target="_blank" class="text-blue-300 hover:text-blue-100 underline ml-2">🗺️ Karte öffnen</a>`;
             }
         }
     </script>
