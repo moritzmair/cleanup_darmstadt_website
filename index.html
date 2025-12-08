@@ -11,6 +11,9 @@
     
     <!-- Leaflet CSS (lokal) -->
     <link rel="stylesheet" href="leaflet.css" />
+    <!-- Leaflet MarkerCluster CSS (lokal) -->
+    <link rel="stylesheet" href="MarkerCluster.css" />
+    <link rel="stylesheet" href="MarkerCluster.Default.css" />
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8">
@@ -46,18 +49,11 @@
             </div>
         </section>
 
-        <!-- Next Event Section -->
-        <section id="next-event" class="bg-gray-800 text-white rounded-lg shadow-lg p-8 mb-8">
-            <h2 class="text-3xl font-bold mb-6 text-center">🗓️ Nächster Termin</h2>
+        <!-- Next Events Section -->
+        <section id="next-events" class="bg-gray-800 text-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold mb-6 text-center">🗓️ Nächste Termine</h2>
             <div class="max-w-3xl mx-auto">
-                <div class="text-center mb-6">
-                    <p id="event-date" class="text-2xl font-bold mb-2"></p>
-                    <p id="event-time" class="text-xl"></p>
-                </div>
-                
-                <div class="bg-white/20 rounded-lg p-6 mb-4">
-                    <p class="text-lg mb-2" id="event-location"></p>
-                </div>
+                <div id="events-list" class="space-y-4 mb-6"></div>
                 
                 <div class="bg-white/10 rounded-lg p-4 italic">
                     <p class="text-center">
@@ -78,12 +74,15 @@
                 <h4 class="font-bold mb-3">Legende:</h4>
                 <div class="flex flex-col gap-2">
                     <div class="flex items-center gap-3">
-                        <div class="w-6 h-6 bg-green-500 rounded-full"></div>
-                        <span>Durchgeführte Cleanup-Aktionen</span>
+                        <div class="w-8 h-8 bg-green-500 rounded-full text-white flex items-center justify-center font-bold shadow">5</div>
+                        <span>Cluster mit mehreren durchgeführten Aktionen (Zahl zeigt Anzahl)</span>
                     </div>
                     <div class="flex items-center gap-3">
-                        <div class="w-6 h-6 bg-yellow-500 rounded-full"></div>
-                        <span>Nächster geplanter Einsatzort</span>
+                        <svg width="25" height="41" viewBox="0 0 25 41" class="flex-shrink-0">
+                            <path fill="#28a745" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.4 12.5 28.5 12.5 28.5S25 20.9 25 12.5C25 5.6 19.4 0 12.5 0z"/>
+                            <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+                        </svg>
+                        <span>Einzelne durchgeführte Cleanup-Aktion</span>
                     </div>
                 </div>
             </div>
@@ -156,6 +155,8 @@
 
     <!-- Leaflet JS (lokal) -->
     <script src="leaflet.js"></script>
+    <!-- Leaflet MarkerCluster JS (lokal) -->
+    <script src="leaflet.markercluster.js"></script>
     
     <!-- Map Script -->
     <script>
@@ -170,6 +171,13 @@
 
         // Define cleanup locations with coordinates
         const cleanupLocations = [
+            {
+                name: '',
+                lat: 49.8749277777778,
+                lng: 8.67290277777778,
+                type: 'planned',
+                description: 'am 04.01.2025 um 10:30',
+            },
             {
                 name: 'Bürgerpark Parkplatz',
                 lat: 49.888260847276264,
@@ -337,19 +345,33 @@
             shadowSize: [41, 41]
         });
 
-        // Add markers to map
+        // Create marker cluster groups
+        const completedMarkers = L.markerClusterGroup({
+            iconCreateFunction: function(cluster) {
+                const count = cluster.getChildCount();
+                return L.divIcon({
+                    html: '<div style="background-color: #28a745; color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">' + count + '</div>',
+                    className: 'custom-cluster-icon',
+                    iconSize: L.point(40, 40)
+                });
+            },
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false,
+            zoomToBoundsOnClick: true,
+            maxClusterRadius: 50
+        });
+
+        // Add markers only for completed locations
         cleanupLocations.forEach(location => {
-            // Skip locations without coordinates
-            if (!location.lat || !location.lng) return;
+            // Skip locations without coordinates or planned events
+            if (!location.lat || !location.lng || location.type === 'planned') return;
             
-            const icon = location.type === 'planned' ? yellowIcon : greenIcon;
-            const marker = L.marker([location.lat, location.lng], { icon: icon }).addTo(map);
+            const marker = L.marker([location.lat, location.lng], { icon: greenIcon });
             
             const popupContent = `
                 <div style="font-family: sans-serif; max-width: 280px;">
                     ${location.name ? `<h3 style="font-weight: bold; color: #28a745; margin-bottom: 5px;">${location.name}</h3>` : ''}
                     <p style="margin: 0; font-size: 14px;">${location.description}</p>
-                    ${location.type === 'planned' ? '<p style="margin-top: 5px; font-weight: bold; color: #ffc107;">📍 Nächster Termin!</p>' : ''}
                     ${location.image ? `<img src="${location.image}" alt="Cleanup Foto" style="width: 280px; margin-top: 10px; border-radius: 4px;">` : ''}
                 </div>
             `;
@@ -358,26 +380,61 @@
                 minWidth: 280,
                 maxWidth: 300
             });
+
+            completedMarkers.addLayer(marker);
         });
 
-        // Update next event section from planned location
-        const nextEvent = cleanupLocations.find(loc => loc.type === 'planned');
-        if (nextEvent) {
-            // Parse date from description (format: "Nächster Cleanup am 30.11.2025 um 10:30")
-            const dateMatch = nextEvent.description.match(/(\d{2})\.(\d{2})\.(\d{4})\s+um\s+(\d{2}:\d{2})/);
-            if (dateMatch) {
-                const [_, day, month, year, time] = dateMatch;
-                const date = new Date(year, month - 1, day);
-                const weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-                const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        // Add cluster group to map
+        map.addLayer(completedMarkers);
+
+        // Update next events list from planned locations
+        const plannedEvents = cleanupLocations
+            .filter(loc => loc.type === 'planned')
+            .sort((a, b) => {
+                // Parse dates from description (format: "am 14.12.2025 um 10:30")
+                const dateMatchA = a.description.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                const dateMatchB = b.description.match(/(\d{2})\.(\d{2})\.(\d{4})/);
                 
-                const formattedDate = `${weekdays[date.getDay()]}, ${day}. ${months[date.getMonth()]} ${year}`;
-                
-                document.getElementById('event-date').textContent = formattedDate;
-                document.getElementById('event-time').textContent = `${time} Uhr bis ca. 12:00 Uhr`;
-                const osmLink = `https://www.openstreetmap.org/?mlat=${nextEvent.lat}&mlon=${nextEvent.lng}&zoom=17`;
-                document.getElementById('event-location').innerHTML = `<strong>📍 Einsatzgebiet:</strong> ${nextEvent.name} <a href="${osmLink}" target="_blank" class="text-blue-300 hover:text-blue-100 underline ml-2">🗺️ Karte öffnen</a>`;
-            }
+                if (dateMatchA && dateMatchB) {
+                    const dateA = new Date(dateMatchA[3], dateMatchA[2] - 1, dateMatchA[1]);
+                    const dateB = new Date(dateMatchB[3], dateMatchB[2] - 1, dateMatchB[1]);
+                    return dateB - dateA; // Absteigend sortieren (spätestes Event zuerst)
+                }
+                return 0;
+            });
+        
+        const eventsListElement = document.getElementById('events-list');
+        
+        if (plannedEvents.length > 0) {
+            plannedEvents.forEach(event => {
+                // Parse date from description (format: "am 14.12.2025 um 10:30")
+                const dateMatch = event.description.match(/(\d{2})\.(\d{2})\.(\d{4})\s+um\s+(\d{2}:\d{2})/);
+                if (dateMatch) {
+                    const [_, day, month, year, time] = dateMatch;
+                    const date = new Date(year, month - 1, day);
+                    const weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+                    const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                    
+                    const formattedDate = `${weekdays[date.getDay()]}, ${day}. ${months[date.getMonth()]} ${year}`;
+                    const osmLink = `https://www.openstreetmap.org/?mlat=${event.lat}&mlon=${event.lng}&zoom=17`;
+                    
+                    const eventCard = document.createElement('div');
+                    eventCard.className = 'bg-white/20 rounded-lg p-6';
+                    eventCard.innerHTML = `
+                        <div class="text-center mb-4">
+                            <p class="text-2xl font-bold mb-2">${formattedDate}</p>
+                            <p class="text-xl">${time} Uhr bis ca. 12:00 Uhr</p>
+                        </div>
+                        <p class="text-lg">
+                            <strong>📍 Treffpunkt:</strong> ${event.name}
+                            <a href="${osmLink}" target="_blank" class="text-yellow-300 hover:text-yellow-100 underline ml-2">🗺️ Karte öffnen</a>
+                        </p>
+                    `;
+                    eventsListElement.appendChild(eventCard);
+                }
+            });
+        } else {
+            eventsListElement.innerHTML = '<p class="text-center text-lg">Aktuell sind keine Termine geplant. Schau bald wieder vorbei!</p>';
         }
     </script>
     <!-- Footer with Datenschutz & Impressum -->
