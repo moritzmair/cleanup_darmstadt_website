@@ -172,11 +172,11 @@
         // Define cleanup locations with coordinates
         const cleanupLocations = [
             {
-                name: '',
-                lat: 49.8749277777778,
-                lng: 8.67290277777778,
+                name: 'Ostbahnhof',
+                lat: 49.874938,
+                lng: 8.673340,
                 type: 'planned',
-                description: 'am 04.01.2025 um 10:30',
+                description: 'am 04.01.2026 um 10:30',
             },
             {
                 name: 'Bürgerpark Parkplatz',
@@ -398,7 +398,7 @@
                 if (dateMatchA && dateMatchB) {
                     const dateA = new Date(dateMatchA[3], dateMatchA[2] - 1, dateMatchA[1]);
                     const dateB = new Date(dateMatchB[3], dateMatchB[2] - 1, dateMatchB[1]);
-                    return dateB - dateA; // Absteigend sortieren (spätestes Event zuerst)
+                    return dateA - dateB;
                 }
                 return 0;
             });
