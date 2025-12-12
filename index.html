@@ -583,7 +583,7 @@
     <!-- Footer with Datenschutz & Impressum -->
     <footer class="bg-gray-800 text-gray-300 py-8">
         <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="max-w-4xl mx-auto space-y-8">
                 <!-- Impressum -->
                 <div>
                     <h3 class="text-lg font-bold text-white mb-3">Impressum</h3>
@@ -598,16 +598,47 @@
                 <!-- Datenschutz -->
                 <div>
                     <h3 class="text-lg font-bold text-white mb-3">Datenschutz</h3>
-                    <p class="text-sm">
-                        Diese Website verwendet keine Cookies und erfasst keine personenbezogenen Daten.
-                        Die Karte wird über OpenStreetMap bereitgestellt.
-                        Kontaktanfragen per E-Mail werden nur zur Beantwortung Ihrer Anfrage verwendet.
-                    </p>
+                    <div class="text-sm space-y-3">
+                        <div>
+                            <strong class="text-white">Verantwortliche Stelle:</strong><br>
+                            Cleanup Darmstadt<br>
+                            E-Mail: birgit [at] cleanup-darmstadt.de
+                        </div>
+                        
+                        <div>
+                            <strong class="text-white">Erfassung personenbezogener Daten:</strong><br>
+                            Beim Besuch dieser Website werden nur technisch notwendige Daten wie IP-Adresse, Datum/Uhrzeit, aufgerufene Datei und Browsertyp gespeichert. Diese Daten werden nicht weitergegeben und dienen ausschließlich der Bereitstellung der Website.
+                        </div>
+                        
+                        <div>
+                            <strong class="text-white">Eingebundene Dienste:</strong><br>
+                            Die Karte wird über OpenStreetMap bereitgestellt. Dabei können technische Daten wie Ihre IP-Adresse an OpenStreetMap-Server übermittelt werden. Weitere Infos: <a href="https://wiki.osmfoundation.org/wiki/Privacy_Policy" target="_blank" class="text-primary hover:text-green-400 underline">OpenStreetMap Privacy Policy</a>
+                        </div>
+                        
+                        <div>
+                            <strong class="text-white">Kontakt per E-Mail:</strong><br>
+                            Ihre Daten werden nur zur Bearbeitung Ihrer Anfrage genutzt und anschließend gelöscht.
+                        </div>
+                        
+                        <div>
+                            <strong class="text-white">Cookies/Tracking:</strong><br>
+                            Es werden keine Cookies, Tracking- oder Analyse-Tools eingesetzt.
+                        </div>
+                        
+                        <div>
+                            <strong class="text-white">Ihre Rechte:</strong><br>
+                            Sie haben jederzeit das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Widerspruch und Datenübertragbarkeit.
+                            Bei Fragen wenden Sie sich bitte per E-Mail an uns. Sie haben außerdem das Recht, sich bei der zuständigen Aufsichtsbehörde zu beschweren.
+                        </div>
+                    </div>
                 </div>
             </div>
             
             <div class="text-center mt-6 pt-6 border-t border-gray-700 text-sm">
                 <p>&copy; 2025 Cleanup Gruppe Darmstadt</p>
+                <p class="mt-2 text-gray-400">
+                    Website erstellt von <a href="https://moritzmair.de/" target="_blank" class="text-primary hover:text-green-400 transition">moritzmair.de</a>
+                </p>
             </div>
         </div>
     </footer>
