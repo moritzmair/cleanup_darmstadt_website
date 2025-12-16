@@ -125,26 +125,46 @@
             </div>
         </section>
 
-        <!-- Map Section -->
+        <!-- Map & List Section -->
         <section id="map-section" class="bg-white rounded-lg shadow-lg p-8 mb-8">
-            <!-- Map Container -->
-            <div id="map" class="h-[400px] md:h-[600px] lg:h-[800px] rounded-lg shadow-md mb-4 relative z-0"></div>
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="tab-map" class="tab-button active px-6 py-3 font-semibold text-primary border-b-2 border-primary transition">
+                    🗺️ Kartenansicht
+                </button>
+                <button id="tab-list" class="tab-button px-6 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-primary transition">
+                    📋 Listenansicht
+                </button>
+            </div>
             
-            <!-- Map Legend -->
-            <div class="bg-gray-50 rounded-lg p-4">
-                <h4 class="font-bold mb-3">Legende:</h4>
-                <div class="flex flex-col gap-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 bg-green-500 rounded-full text-white flex items-center justify-center font-bold shadow">5</div>
-                        <span>Cluster mit mehreren durchgeführten Aktionen (Zahl zeigt Anzahl)</span>
+            <!-- Map View -->
+            <div id="view-map" class="tab-content">
+                <!-- Map Container -->
+                <div id="map" class="h-[400px] md:h-[600px] lg:h-[800px] rounded-lg shadow-md mb-4 relative z-0"></div>
+                
+                <!-- Map Legend -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-bold mb-3">Legende:</h4>
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-green-500 rounded-full text-white flex items-center justify-center font-bold shadow">5</div>
+                            <span>Cluster mit mehreren durchgeführten Aktionen (Zahl zeigt Anzahl)</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <svg width="25" height="41" viewBox="0 0 25 41" class="flex-shrink-0">
+                                <path fill="#28a745" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.4 12.5 28.5 12.5 28.5S25 20.9 25 12.5C25 5.6 19.4 0 12.5 0z"/>
+                                <circle cx="12.5" cy="12.5" r="5" fill="white"/>
+                            </svg>
+                            <span>Einzelne durchgeführte Cleanup-Aktion</span>
+                        </div>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <svg width="25" height="41" viewBox="0 0 25 41" class="flex-shrink-0">
-                            <path fill="#28a745" d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.4 12.5 28.5 12.5 28.5S25 20.9 25 12.5C25 5.6 19.4 0 12.5 0z"/>
-                            <circle cx="12.5" cy="12.5" r="5" fill="white"/>
-                        </svg>
-                        <span>Einzelne durchgeführte Cleanup-Aktion</span>
-                    </div>
+                </div>
+            </div>
+            
+            <!-- List View -->
+            <div id="view-list" class="tab-content hidden">
+                <div id="cleanup-list" class="space-y-4 max-h-[600px] md:max-h-[800px] overflow-y-auto pr-2">
+                    <!-- List items will be populated by JavaScript -->
                 </div>
             </div>
         </section>
@@ -535,6 +555,125 @@
         } else {
             eventsListElement.innerHTML = '<p class="text-center text-lg">Aktuell sind keine Termine geplant. Schau bald wieder vorbei!</p>';
         }
+        
+        // Populate list view with completed cleanups
+        function populateListView() {
+            const listContainer = document.getElementById('cleanup-list');
+            const completedLocations = cleanupLocations
+                .filter(loc => isEventCompleted(loc.description))
+                .sort((a, b) => {
+                    const dateMatchA = a.description.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                    const dateMatchB = b.description.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                    
+                    if (dateMatchA && dateMatchB) {
+                        const dateA = new Date(dateMatchA[3], dateMatchA[2] - 1, dateMatchA[1]);
+                        const dateB = new Date(dateMatchB[3], dateMatchB[2] - 1, dateMatchB[1]);
+                        return dateB - dateA; // Newest first
+                    }
+                    return 0;
+                });
+            
+            if (completedLocations.length > 0) {
+                listContainer.innerHTML = '';
+                completedLocations.forEach(location => {
+                    const dateMatch = location.description.match(/(\d{2})\.(\d{2})\.(\d{4})/);
+                    if (dateMatch) {
+                        const [_, day, month, year] = dateMatch;
+                        const date = new Date(year, month - 1, day);
+                        const weekdays = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+                        const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+                        
+                        const formattedDate = `${weekdays[date.getDay()]}, ${day}. ${months[date.getMonth()]} ${year}`;
+                        const osmLink = `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}&zoom=17`;
+                        const googleMapsLink = `https://www.google.com/maps?q=${location.lat},${location.lng}`;
+                        
+                        const listItem = document.createElement('div');
+                        listItem.className = 'bg-gray-50 rounded-lg p-4 hover:shadow-md transition';
+                        listItem.innerHTML = `
+                            <div class="flex flex-col md:flex-row gap-4">
+                                ${location.image ? `
+                                    <div class="md:w-48 flex-shrink-0">
+                                        <img src="${location.image}" alt="Cleanup Foto" loading="lazy" class="w-full h-32 object-cover rounded-lg">
+                                    </div>
+                                ` : ''}
+                                <div class="flex-grow">
+                                    <h3 class="font-bold text-lg text-primary mb-1">${location.name || 'Cleanup-Aktion'}</h3>
+                                    <p class="text-gray-600 mb-2">${formattedDate}</p>
+                                    <div class="flex gap-3 text-sm flex-wrap">
+                                        <a href="${osmLink}" target="_blank" class="text-primary hover:text-green-700 underline">🗺️ OpenStreetMap</a>
+                                        <a href="${googleMapsLink}" target="_blank" class="text-primary hover:text-green-700 underline">🗺️ Google Maps</a>
+                                        <button onclick="showOnMap(${location.lat}, ${location.lng})" class="text-primary hover:text-green-700 underline">📍 Auf Karte zeigen</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        listContainer.appendChild(listItem);
+                    }
+                });
+                
+                // Add note about earlier actions
+                const noteElement = document.createElement('div');
+                noteElement.className = 'bg-blue-50 border-l-4 border-blue-500 p-4 mt-6 rounded-lg';
+                noteElement.innerHTML = `
+                    <p class="text-blue-800">
+                        ℹ️ Die Cleanup Gruppe Darmstadt ist seit einigen Jahren aktiv. Frühere Aktionen sind hier nicht näher aufgeführt.
+                    </p>
+                `;
+                listContainer.appendChild(noteElement);
+            } else {
+                listContainer.innerHTML = '<p class="text-center text-gray-500">Keine abgeschlossenen Aktionen vorhanden.</p>';
+            }
+        }
+        
+        // Function to show location on map and switch to map view
+        window.showOnMap = function(lat, lng) {
+            // Switch to map tab
+            document.getElementById('tab-map').click();
+            
+            // Center map and zoom
+            map.setView([lat, lng], 16);
+            
+            // Scroll to map section
+            document.getElementById('map-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        
+        // Initialize list view
+        populateListView();
+    </script>
+    
+    <!-- Tab Switching Script -->
+    <script>
+        const tabMap = document.getElementById('tab-map');
+        const tabList = document.getElementById('tab-list');
+        const viewMap = document.getElementById('view-map');
+        const viewList = document.getElementById('view-list');
+        
+        tabMap.addEventListener('click', () => {
+            // Update tabs
+            tabMap.classList.add('active', 'text-primary', 'border-primary');
+            tabMap.classList.remove('text-gray-600', 'border-transparent');
+            tabList.classList.remove('active', 'text-primary', 'border-primary');
+            tabList.classList.add('text-gray-600', 'border-transparent');
+            
+            // Update views
+            viewMap.classList.remove('hidden');
+            viewList.classList.add('hidden');
+            
+            // Invalidate map size (Leaflet needs this after visibility change)
+            setTimeout(() => map.invalidateSize(), 100);
+        });
+        
+        tabList.addEventListener('click', () => {
+            // Update tabs
+            tabList.classList.add('active', 'text-primary', 'border-primary');
+            tabList.classList.remove('text-gray-600', 'border-transparent');
+            tabMap.classList.remove('active', 'text-primary', 'border-primary');
+            tabMap.classList.add('text-gray-600', 'border-transparent');
+            
+            // Update views
+            viewList.classList.remove('hidden');
+            viewMap.classList.add('hidden');
+        });
     </script>
     
     <!-- Mobile Menu & Scroll-to-Top Script -->
