@@ -253,10 +253,15 @@
         // Define cleanup locations with coordinates
         const cleanupLocations = [
             {
+                name: 'Ort wird noch bekannt gegeben',
+                description: 'am 25.01.2026',
+            },
+            {
                 name: 'Ostbahnhof',
                 lat: 49.874938,
                 lng: 8.673340,
                 description: 'am 04.01.2026',
+                image: 'aktionen/2026-01-04.jpeg'
             },
             {
                 name: 'Bürgerpark Parkplatz',
@@ -415,9 +420,16 @@
                 return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${pad(date.getHours())}${pad(date.getMinutes())}00`;
             };
             
-            const osmUrl = `https://www.openstreetmap.org/?mlat=${event.lat}&mlon=${event.lng}&zoom=17`;
-            const googleMapsUrl = `https://www.google.com/maps?q=${event.lat},${event.lng}`;
-            const description = `Cleanup-Aktion der Cleanup Gruppe Darmstadt\\n\\nTreffpunkt:\\nOpenStreetMap: ${osmUrl}\\nGoogle Maps: ${googleMapsUrl}`;
+            // Build description with links only if coordinates are available
+            let description = 'Cleanup-Aktion der Cleanup Gruppe Darmstadt';
+            let geoField = '';
+            
+            if (event.lat && event.lng) {
+                const osmUrl = `https://www.openstreetmap.org/?mlat=${event.lat}&mlon=${event.lng}&zoom=17`;
+                const googleMapsUrl = `https://www.google.com/maps?q=${event.lat},${event.lng}`;
+                description += `\\n\\nTreffpunkt:\\nOpenStreetMap: ${osmUrl}\\nGoogle Maps: ${googleMapsUrl}`;
+                geoField = `GEO:${event.lat};${event.lng}`;
+            }
             
             const icsContent = [
                 'BEGIN:VCALENDAR',
@@ -428,11 +440,11 @@
                 `DTEND:${formatICSDate(endDate)}`,
                 `SUMMARY:Cleanup Darmstadt - ${event.name}`,
                 `LOCATION:${event.name}`,
-                `GEO:${event.lat};${event.lng}`,
+                geoField,
                 `DESCRIPTION:${description}`,
                 'END:VEVENT',
                 'END:VCALENDAR'
-            ].join('\r\n');
+            ].filter(line => line).join('\r\n');
             
             return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(icsContent);
         }
@@ -527,9 +539,21 @@
                     const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
                     
                     const formattedDate = `${weekdays[date.getDay()]}, ${day}. ${months[date.getMonth()]} ${year}`;
-                    const osmLink = `https://www.openstreetmap.org/?mlat=${event.lat}&mlon=${event.lng}&zoom=17`;
-                    const googleMapsLink = `https://www.google.com/maps?q=${event.lat},${event.lng}`;
-                    const icsLink = generateICS(event, day, month, year);
+                    
+                    // Build map links HTML only if coordinates are available
+                    let mapLinksHtml = '';
+                    if (event.lat && event.lng) {
+                        const osmLink = `https://www.openstreetmap.org/?mlat=${event.lat}&mlon=${event.lng}&zoom=17`;
+                        const googleMapsLink = `https://www.google.com/maps?q=${event.lat},${event.lng}`;
+                        const icsLink = generateICS(event, day, month, year);
+                        mapLinksHtml = `
+                            <a href="${osmLink}" target="_blank" class="text-yellow-300 hover:text-yellow-100 underline">🗺️ OpenStreetMap</a>
+                            <span class="text-white/50 mx-2">•</span>
+                            <a href="${googleMapsLink}" target="_blank" class="text-yellow-300 hover:text-yellow-100 underline">🗺️ Google Maps</a>
+                            <span class="text-white/50 mx-2">•</span>
+                            <a href="${icsLink}" download="cleanup-darmstadt-${day}-${month}-${year}.ics" class="text-yellow-300 hover:text-yellow-100 underline">📅 Kalender</a>
+                        `;
+                    }
                     
                     const eventCard = document.createElement('div');
                     eventCard.className = 'bg-white/20 rounded-lg p-6';
@@ -541,13 +565,7 @@
                         <p class="text-lg">
                             <strong>📍 Treffpunkt:</strong> ${event.name}
                         </p>
-                        <p class="text-base mt-2">
-                            <a href="${osmLink}" target="_blank" class="text-yellow-300 hover:text-yellow-100 underline">🗺️ OpenStreetMap</a>
-                            <span class="text-white/50 mx-2">•</span>
-                            <a href="${googleMapsLink}" target="_blank" class="text-yellow-300 hover:text-yellow-100 underline">🗺️ Google Maps</a>
-                            <span class="text-white/50 mx-2">•</span>
-                            <a href="${icsLink}" download="cleanup-darmstadt-${day}-${month}-${year}.ics" class="text-yellow-300 hover:text-yellow-100 underline">📅 Kalender</a>
-                        </p>
+                        ${mapLinksHtml ? `<p class="text-base mt-2">${mapLinksHtml}</p>` : ''}
                     `;
                     eventsListElement.appendChild(eventCard);
                 }
@@ -584,8 +602,20 @@
                         const months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
                         
                         const formattedDate = `${weekdays[date.getDay()]}, ${day}. ${months[date.getMonth()]} ${year}`;
-                        const osmLink = `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}&zoom=17`;
-                        const googleMapsLink = `https://www.google.com/maps?q=${location.lat},${location.lng}`;
+                        
+                        // Build map links HTML only if coordinates are available
+                        let mapLinksHtml = '';
+                        if (location.lat && location.lng) {
+                            const osmLink = `https://www.openstreetmap.org/?mlat=${location.lat}&mlon=${location.lng}&zoom=17`;
+                            const googleMapsLink = `https://www.google.com/maps?q=${location.lat},${location.lng}`;
+                            mapLinksHtml = `
+                                <div class="flex gap-3 text-sm flex-wrap">
+                                    <a href="${osmLink}" target="_blank" class="text-primary hover:text-green-700 underline">🗺️ OpenStreetMap</a>
+                                    <a href="${googleMapsLink}" target="_blank" class="text-primary hover:text-green-700 underline">🗺️ Google Maps</a>
+                                    <button onclick="showOnMap(${location.lat}, ${location.lng})" class="text-primary hover:text-green-700 underline">📍 Auf Karte zeigen</button>
+                                </div>
+                            `;
+                        }
                         
                         const listItem = document.createElement('div');
                         listItem.className = 'bg-gray-50 rounded-lg p-4 hover:shadow-md transition';
@@ -599,11 +629,7 @@
                                 <div class="flex-grow">
                                     <h3 class="font-bold text-lg text-primary mb-1">${location.name || 'Cleanup-Aktion'}</h3>
                                     <p class="text-gray-600 mb-2">${formattedDate}</p>
-                                    <div class="flex gap-3 text-sm flex-wrap">
-                                        <a href="${osmLink}" target="_blank" class="text-primary hover:text-green-700 underline">🗺️ OpenStreetMap</a>
-                                        <a href="${googleMapsLink}" target="_blank" class="text-primary hover:text-green-700 underline">🗺️ Google Maps</a>
-                                        <button onclick="showOnMap(${location.lat}, ${location.lng})" class="text-primary hover:text-green-700 underline">📍 Auf Karte zeigen</button>
-                                    </div>
+                                    ${mapLinksHtml}
                                 </div>
                             </div>
                         `;
